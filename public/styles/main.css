@@ -50,3 +50,9 @@ html, body {
 .topbar a:last-child::after {
     display: none;
 }
+
+.topbar a.open,
+.topbar .username.open {
+    color: #FFD200;
+    pointer-events: none;
+}
