@@ -1,0 +1,52 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+.topbar {
+    display: flex;
+    background-color: #003466;
+    height: 60px;
+}
+
+.topbar .username {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    position: relative;
+}
+
+.topbar a {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.topbar a:hover {
+    color: #FFD200;
+    background-color: transparent;
+}
+
+.topbar .username::after,
+.topbar a::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 50%;
+    width: 1px;
+    background-color: #FFFFFF;
+}
+
+.topbar a:last-child::after {
+    display: none;
+}
