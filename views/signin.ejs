@@ -8,5 +8,19 @@
         <a href="/signin" class="open">Sign In</a>
         <a href="/signup">Sign Up</a>
     </div>
-    <p>Sign In</p>
+    <form method="POST" class="post-form" action="/signin">
+    <div class="form-bar">
+        <label for="user_id">Username:</label><br>
+        <input type="text" id="user_id" name="user_id" value="" required>
+    </div>
+
+    <div class="form-bar">
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" value="" required>
+    </div>
+    <button type="submit" class="submit-btn">Sign In</button>
+    <% if (locals.error) { %>
+        <p class="error"><%= error %></p>
+    <% } %>
+</form>
 </body>
