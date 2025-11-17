@@ -2,11 +2,82 @@
 
 <body>
     <div class="topbar">
-        <div class="username">Username</div>
+        <div class="username">Welcome, <%= user.fname %></div>
         <a href="/" class="open">My Tasks</a>
         <a href="/analytics">User Analytics</a>
         <a href="/signin">Sign In</a>
         <a href="/signup">Sign Up</a>
     </div>
-    <p>Tasks</p>
+
+    <h2>Tasks</h2>
+
+    <!-- check if user is logged in before allowing task creation -->
+    <% if(user) { %>
+    <!-- call task creation function when user is ready -->
+    <form action="/task/create" method="POST">
+        <input type="text" name="title" placeholder="Title" required />
+        <input type="text" name="description" placeholder="Description" />
+        <input type="date" name="due_date" />
+        <select name="priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+        </select>
+        <button type="submit">Add Task</button>
+    </form>
+    <% } %>
+
+    <h3>My Tasks:</h3>
+    <ul>
+        <% tasks.forEach(task => { %>
+            <li>
+                <strong><%= task.title %></strong> - <%= task.description %> - <%= task.priority %> - <%= task.due_date ? task.due_date.toISOString().split('T')[0] : 'No due date' %>
+                <div class="task-buttons" style="margin-top:5px;">
+
+                    <!-- delete button -->
+                    <form action="/task/delete" method="POST" style="display:inline;">
+                        <input type="hidden" name="taskId" value="<%= task.task_id %>">
+                        <button type="submit">Delete</button>
+                    </form>
+
+                    <!-- edit button to toggle the edit boxes -->
+                    <button type="button" onclick="toggleEditForm(<%= task.task_id %>)">Edit</button>
+                </div>
+
+                <!-- Edit button box identifiers -->
+                <form action="/task/update" method="POST" id="update-form-<%= task.task_id %>" style="display:none; margin-top:10px;">
+                    <input type="hidden" name="taskId" value="<%= task.task_id %>">
+                    <input type="text" name="title" value="<%= task.title %>" required />
+                    <input type="text" name="description" value="<%= task.description %>" />
+                    <input type="date" name="due_date" value="<%= task.due_date ? task.due_date.toISOString().split('T')[0] : '' %>" />
+                    <select name="priority">
+                        <option value="low" <%= task.priority === "low" ? 'selected' : '' %>>Low</option>
+                        <option value="medium" <%= task.priority === "medium" ? 'selected' : '' %>>Medium</option>
+                        <option value="high" <%= task.priority === "high" ? 'selected' : '' %>>High</option>
+                    </select>
+                    <select name="status">
+                        <option value="open" <%= task.status === "open" ? 'selected' : '' %>>Open</option>
+                        <option value="completed" <%= task.status === "completed" ? 'selected' : '' %>>Completed</option>
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+            </li>
+        <% }) %>
+    </ul>
+
+    <!-- script to handle toggleing the update entry boxes -->
+    <script>
+        function toggleEditForm(taskId) 
+        {
+            // find the edit button request
+            var form = document.getElementById("update-form-${taskId}");
+
+            if (!form)
+            {
+                return;
+            }
+            // handle conditional display for edit boxes
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </body>
