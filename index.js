@@ -22,9 +22,6 @@ app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 
-
-
-
 app.get('/', (req, res) => {
     res.render("index.ejs");
 });
@@ -39,6 +36,18 @@ app.get('/signup', (req, res) => {
 
 app.get('/signin', (req, res) => {
     res.render("signin.ejs");
+});
+
+app.post("/signup", async (req, res) => {
+    const {user_id, password, fname, lname} = req.body;
+    console.log(user_id, password, fname, lname)
+    res.redirect("/")
+});
+
+app.post("/signin", async (req, res) => {
+    const {user_id, password} = req.body;
+    console.log(user_id, password)
+    res.redirect("/")
 });
 
 app.listen(port, () => {
