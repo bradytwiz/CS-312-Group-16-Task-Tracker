@@ -9,66 +9,80 @@
         <a href="/signup">Sign Up</a>
     </div>
 
-    <h2>Tasks</h2>
+    <div class="task-container">
 
-    <!-- check if user is logged in before allowing task creation -->
-    <% if(user) { %>
-    <!-- call task creation function when user is ready -->
-    <form action="/task/create" method="POST">
-        <input type="text" name="title" placeholder="Title" required />
-        <input type="text" name="description" placeholder="Description" />
-        <input type="date" name="due_date" />
-        <select name="priority">
-            <option value="low">Low</option>
-            <option value="medium" selected>Medium</option>
-            <option value="high">High</option>
-        </select>
-        <select name="assignement">
-            <% users.forEach(name => { %>
-                <option value="<%= name.user_id %>"><%= name.first_name %></option>
-            <% }) %>
-        </select>
-        <button type="submit">Add Task</button>
-    </form>
-    <% } %>
+        <h2>Tasks</h2>
 
-    <h3>My Tasks:</h3>
-    <ul>
-        <% tasks.forEach(task => { %>
-            <li>
-                <strong><%= task.title %></strong> - <%= task.description %> - <%= task.priority %> - <%= task.due_date ? task.due_date.toISOString().split('T')[0] : 'No due date' %>
-                <div class="task-buttons" style="margin-top:5px;">
+        <% if(user) { %>
+        <form action="/task/create" method="POST" class="task-create-form">
+            <input type="text" name="title" placeholder="Title" required />
+            <input type="text" name="description" placeholder="Description" />
+            <input type="date" name="due_date" />
 
-                    <!-- delete button -->
-                    <form action="/task/delete" method="POST" style="display:inline;">
+            <select name="priority">
+                <option value="Low">Low</option>
+                <option value="Medium" selected>Medium</option>
+                <option value="High">High</option>
+            </select>
+
+            <select name="assignment">
+                <% users.forEach(name => { %>
+                    <option value="<%= name.user_id %>"><%= name.first_name %></option>
+                <% }) %>
+            </select>
+
+            <button type="submit" class="task-submit-btn">Add Task</button>
+        </form>
+        <% } %>
+
+        <h3>My Tasks:</h3>
+
+        <ul class="task-list">
+            <% tasks.forEach(task => { %>
+                <li>
+                    <strong><%= task.title %></strong> - 
+                    <%= task.description %> - 
+                    <%= task.priority %> -
+                    <%= task.due_date ? task.due_date.toISOString().split('T')[0] : 'No due date' %>
+
+                    <div class="task-buttons">
+                        <form action="/task/delete" method="POST" style="display:inline;">
+                            <input type="hidden" name="taskId" value="<%= task.task_id %>">
+                            <button type="submit" class="delete-btn">Delete</button>
+                        </form>
+
+                        <button type="button" class="edit-btn" onclick="toggleEditForm(<%= task.task_id %>)">Edit</button>
+                    </div>
+
+                    <form action="/task/update" method="POST" 
+                        id="update-form-<%= task.task_id %>" 
+                        class="update-form">
+
                         <input type="hidden" name="taskId" value="<%= task.task_id %>">
-                        <button type="submit">Delete</button>
+
+                        <input type="text" name="title" value="<%= task.title %>" required />
+                        <input type="text" name="description" value="<%= task.description %>" />
+                        <input type="date" name="due_date" value="<%= task.due_date ? task.due_date.toISOString().split('T')[0] : '' %>" />
+
+                        <select name="priority">
+                            <option value="Low" <%= task.priority === "Low" ? 'selected' : '' %>>Low</option>
+                            <option value="Medium" <%= task.priority === "Medium" ? 'selected' : '' %>>Medium</option>
+                            <option value="High" <%= task.priority === "High" ? 'selected' : '' %>>High</option>
+                        </select>
+
+                        <select name="status">
+                            <option value="open" <%= task.status === "open" ? 'selected' : '' %>>Open</option>
+                            <option value="completed" <%= task.status === "completed" ? 'selected' : '' %>>Completed</option>
+                        </select>
+
+                        <button type="submit" class="update-btn">Update</button>
                     </form>
+                </li>
+            <% }) %>
+        </ul>
 
-                    <!-- edit button to toggle the edit boxes -->
-                    <button type="button" onclick="toggleEditForm( <%= task.task_id %> )">Edit</button>
-                </div>
+    </div>
 
-                <!-- Edit button box identifiers -->
-                <form action="/task/update" method="POST" id="update-form-<%= task.task_id %>" style="display:none; margin-top:10px;">
-                    <input type="hidden" name="taskId" value="<%= task.task_id %>">
-                    <input type="text" name="title" value="<%= task.title %>" required />
-                    <input type="text" name="description" value="<%= task.description %>" />
-                    <input type="date" name="due_date" value="<%= task.due_date ? task.due_date.toISOString().split('T')[0] : '' %>" />
-                    <select name="priority">
-                        <option value="low" <%= task.priority === "low" ? 'selected' : '' %>>Low</option>
-                        <option value="medium" <%= task.priority === "medium" ? 'selected' : '' %>>Medium</option>
-                        <option value="high" <%= task.priority === "high" ? 'selected' : '' %>>High</option>
-                    </select>
-                    <select name="status">
-                        <option value="open" <%= task.status === "open" ? 'selected' : '' %>>Open</option>
-                        <option value="completed" <%= task.status === "completed" ? 'selected' : '' %>>Completed</option>
-                    </select>
-                    <button type="submit">Update</button>
-                </form>
-            </li>
-        <% }) %>
-    </ul>
 
     <!-- script to handle toggleing the update entry boxes -->
     <script>

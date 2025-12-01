@@ -153,7 +153,7 @@ app.post("/task/create", async (req, res) => {
         // otherwise assume user in session
 
         // get the submitted task info
-        var { title, description, due_date, priority, status, assignement } = req.body;
+        var { title, description, due_date, priority, status, assignment } = req.body;
         // get user data
         var user = req.session.user.user_id;
         // insert the data into the task DB
@@ -165,7 +165,7 @@ app.post("/task/create", async (req, res) => {
                 due_date || null,
                 priority || "medium",
                 status || "open",
-                assignement
+                assignment
             ]
         );
 

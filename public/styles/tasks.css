@@ -1,0 +1,119 @@
+.task-container {
+    width: 80%;
+    max-width: 900px;
+    margin: 40px auto;
+    color: #003466;
+}
+
+.task-container h2,
+.task-container h3 {
+    text-align: center;
+    color: #003466;
+    margin-bottom: 20px;
+}
+
+.task-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: #f5f5f5;
+    padding: 20px;
+    border: 2px solid #003466;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.task-create-form input,
+.task-create-form select {
+    padding: 10px;
+    border: 1px solid #003466;
+    background-color: #ffffff;
+    color: #000000;
+    font-size: 1rem;
+    outline: none;
+}
+
+.task-create-form input:focus,
+.task-create-form select:focus {
+    border-color: #FFD200;
+}
+
+.task-submit-btn {
+    margin-top: 10px;
+    padding: 12px 20px;
+    background-color: #003466;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 40%;
+    align-self: center;
+    transition: color 0.2s ease;
+}
+
+.task-submit-btn:hover {
+    color: #FFD200;
+}
+
+.task-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 30px;
+}
+
+.task-list li {
+    background: #ffffff;
+    border: 2px solid #003466;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+
+.task-list strong {
+    color: #003466;
+}
+
+.task-buttons button,
+.update-btn,
+.delete-btn,
+.edit-btn {
+    padding: 8px 15px;
+    background-color: #003466;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    transition: color 0.2s ease;
+}
+
+.task-buttons button:hover,
+.update-btn:hover,
+.delete-btn:hover,
+.edit-btn:hover {
+    color: #FFD200;
+}
+
+.update-form {
+    margin-top: 15px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.update-form input,
+.update-form select {
+    padding: 10px;
+    border: 1px solid #003466;
+    background-color: #ffffff;
+}
+
+.update-form input:focus,
+.update-form select:focus {
+    border-color: #FFD200;
+}
+
+.update-btn {
+    width: 30%;
+    align-self: center;
+}
