@@ -23,6 +23,11 @@
             <option value="medium" selected>Medium</option>
             <option value="high">High</option>
         </select>
+        <select name="assignement">
+            <% users.forEach(name => { %>
+                <option value="<%= name.user_id %>"><%= name.first_name %></option>
+            <% }) %>
+        </select>
         <button type="submit">Add Task</button>
     </form>
     <% } %>
@@ -41,7 +46,7 @@
                     </form>
 
                     <!-- edit button to toggle the edit boxes -->
-                    <button type="button" onclick="toggleEditForm(<%= task.task_id %>)">Edit</button>
+                    <button type="button" onclick="toggleEditForm( <%= task.task_id %> )">Edit</button>
                 </div>
 
                 <!-- Edit button box identifiers -->

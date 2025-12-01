@@ -47,15 +47,18 @@ app.get('/', async (req, res) => {
     // attempt to access all assigned user tasks
     try
     {
+        var users = await db.query("SELECT user_id, first_name FROM users");
+        console.log(users.rows)
         // access DB
         var taskSearch = await db.query( "SELECT * FROM tasks WHERE assigned_user = $1 ORDER BY task_id ASC",[userLoggedIn]);
 
         // render the task page
-        res.render("index.ejs", { user: req.session.user,tasks: taskSearch.rows });
+        res.render("index.ejs", { user: req.session.user,tasks: taskSearch.rows, users: users.rows });
     }
     // otherwise assume error
     catch (error)
     {
+        console.log(error)
         // display error
         console.error("Uh oh... we couldn't find any tasks :(");
     }
@@ -90,7 +93,7 @@ app.post("/signup", async (req, res) => {
         }
 
         // assume new user by this point
-        await db.query("INSERT INTO users (user_id, password, fname, lname) VALUES ($1, $2, $3, $4)", [user_id, password, fname, lname]);
+        await db.query("INSERT INTO users (user_id, password, first_name, last_name) VALUES ($1, $2, $3, $4)", [user_id, password, fname, lname]);
         // redirect to signin page
         res.redirect("/signin")
     }
@@ -150,10 +153,9 @@ app.post("/task/create", async (req, res) => {
         // otherwise assume user in session
 
         // get the submitted task info
-        var { title, description, due_date, priority, status } = req.body;
+        var { title, description, due_date, priority, status, assignement } = req.body;
         // get user data
         var user = req.session.user.user_id;
-
         // insert the data into the task DB
         await db.query(
             "INSERT INTO tasks (title, description, due_date, priority, status, assigned_user) VALUES ($1, $2, $3, $4, $5, $6)",
@@ -163,7 +165,7 @@ app.post("/task/create", async (req, res) => {
                 due_date || null,
                 priority || "medium",
                 status || "open",
-                user
+                assignement
             ]
         );
 
@@ -225,6 +227,7 @@ app.post("/task/delete", async (req, res)=> {
 });
 
 app.post( "/task/update", async (req, res)=> {
+    console.log("YELLO")
      // collect the task id for post being updated
     var { taskId, title, description, due_date, priority, status } = req.body;
 
