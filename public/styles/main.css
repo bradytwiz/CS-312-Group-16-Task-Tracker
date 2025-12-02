@@ -56,3 +56,10 @@ html, body {
     color: #FFD200;
     pointer-events: none;
 }
+
+.card {
+    text-align: center;
+    background-color: #f5f5f5;
+    border: 2px solid #003466;
+    padding: 20px;
+}
