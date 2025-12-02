@@ -9,7 +9,7 @@ const db = new pg.Client({
   user: "postgres",
   host: "localhost",
   database: "taskDB",
-  password: "password",
+  password: "Password",
   port: 5432,
 });
 
@@ -35,14 +35,45 @@ app.use(express.json());
 
 // function to redirect to default home page
 app.get('/', async (req, res) => {
-    //check for user signed in
-    if( !req.session.user )
-    {
+    // check for user signed in
+    if (!req.session.user) {
         return res.redirect("/signin");
     }
 
-    // get session info on user
-    var userLoggedIn = req.session.user.user_id;
+    // logged-in user
+    const userLoggedIn = req.session.user.user_id;
+
+    // read ?sort=priority etc.
+    const sort = req.query.sort;
+
+    // determine ORDER BY clause
+    let orderBy = "task_id ASC"; 
+
+    switch (sort) {
+        case "created_desc":
+            orderBy = "task_id DESC";
+            break;
+
+        case "priority":
+            orderBy = `
+                CASE
+                    WHEN priority = 'High' THEN 1
+                    WHEN priority = 'Medium' THEN 2
+                    WHEN priority = 'Low' THEN 3
+                END ASC,
+                task_id ASC
+            `;
+            break;
+
+        case "due_date":
+            orderBy = "due_date ASC NULLS LAST";
+            break;
+
+        case "created_asc":
+        default:
+            orderBy = "task_id ASC";
+            break;
+    }
 
     // attempt to access all assigned user tasks
     try
@@ -50,10 +81,10 @@ app.get('/', async (req, res) => {
         var users = await db.query("SELECT user_id, first_name FROM users");
         console.log(users.rows)
         // access DB
-        var taskSearch = await db.query( "SELECT * FROM tasks WHERE assigned_user = $1 ORDER BY task_id ASC",[userLoggedIn]);
+        var taskSearch = await db.query( `SELECT * FROM tasks WHERE assigned_user = $1  AND status != 'completed' ORDER BY ${orderBy}`,[userLoggedIn]);
 
         // render the task page
-        res.render("index.ejs", { user: req.session.user,tasks: taskSearch.rows, users: users.rows });
+        res.render("index.ejs", { user: req.session.user,tasks: taskSearch.rows, users: users.rows, sort });
     }
     // otherwise assume error
     catch (error)
@@ -65,8 +96,48 @@ app.get('/', async (req, res) => {
 });
 
 // left largely blank for this submission
-app.get('/analytics', (req, res) => {
-    res.render("analytics.ejs");
+app.get('/analytics', async (req, res) => {
+    // check for user signed in
+    if( !req.session.user )
+    {
+        // direct the unverified user back to the home screen
+        return res.redirect("/signin");
+    }
+
+    // otherwise collect user id
+    var userLoggedIn = req.session.user.user_id;
+
+    // attempt to collect user stats
+    try
+    {
+        //collect the tasks closest to their due date
+        var dueSoonTasks = await db.query( "SELECT * FROM tasks WHERE assigned_user = $1 AND due_date >= CURRENT_DATE AND status != 'completed' ORDER BY due_date ASC", [ userLoggedIn ] );
+
+        //collect any tasks that are over due
+        var overdueTasks = await db.query(  "SELECT * FROM tasks WHERE assigned_user = $1 AND due_date < CURRENT_DATE AND status != 'completed' ORDER BY due_date ASC", [ userLoggedIn ] );
+
+        //collect total completed tasks
+        var tasksCompleted = await db.query( "SELECT COUNT(*) FROM tasks WHERE assigned_user = $1 AND status = 'completed'", [ userLoggedIn ] );
+
+        //collect total assigned tasks for user
+        var assignedToUser = await db.query( "SELECT COUNT(*) FROM tasks WHERE assigned_user = $1", [ userLoggedIn ] );
+
+        // render each total to the analytics page
+        res.render( "analytics.ejs", {
+            userLoggedIn: req.session.user,
+            dueSoonTasks: dueSoonTasks,
+            overdueTasks: overdueTasks,
+            tasksCompleted: tasksCompleted,
+            assignedToUser: assignedToUser,
+            error: null });
+    }
+    //otherwise handle error case
+    catch (error)
+    {
+        //display the error to the console and then display to screen
+        console.log(error)
+        res.render("analytics.ejs", { error: "Uh-Oh Something went wrong!" });
+    }
 });
 
 app.get('/signup', (req, res) => {
@@ -183,7 +254,7 @@ app.post("/task/create", async (req, res) => {
 
 app.post("/task/delete", async (req, res)=> {
     // collect the task id for post being deleted
-    var { taskId } = req.body;
+    var { taskId, completionChoice } = req.body;
 
     //check for user signed in
     if( !req.session.user )
@@ -209,14 +280,21 @@ app.post("/task/delete", async (req, res)=> {
             // redirect back to tasks
             return res.redirect("/");
         }
+        //handle task complete case
+        if( completionChoice === "yes")
+        {
+            // update the table to mark task completed
+            await db.query("UPDATE tasks SET status = 'completed' WHERE task_id = $1",[taskId]);
+        }
         // otherwise assume attempt is valid
         else
         {
             // delete the task
             await db.query( "DELETE FROM tasks WHERE task_id = $1", [taskId]);
-            // reload the apge for the user
-            res.redirect("/");
         }
+
+        //assume user still on same page and refresh with updated values
+        res.redirect("/");
     }
     //otherwise assume error
     catch (error)
